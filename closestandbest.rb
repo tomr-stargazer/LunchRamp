@@ -12,34 +12,42 @@ api_host = 'api.yelp.com'
 consumer = OAuth::Consumer.new(consumer_key, consumer_secret, {:site => "http://#{api_host}"})
 access_token = OAuth::AccessToken.new(consumer, token, token_secret)
 
-numRests = 20
-
-path = "/v2/search?term=restaurants&ll=37.786704,-122.401209&radius_filter=500&sort=1&limit=#{numRests}"
-
-closest_rests = []
-
-jsonHash = JSON.parse(access_token.get(path).body)
-businessArray=jsonHash['businesses']
-businessArray.each do |x|
-  closest_rests += [x['name']]
+#returns an array of the closest "numRests" restaurants within "dist" meters sorted by distance - I think numRests maxes at 20 for some reason
+def closestRests(numRests, dist, access_token)
+  path = "/v2/search?term=restaurants&ll=37.786704,-122.401209&radius_filter=#{dist}&sort=1&limit=#{numRests}"
+  closest_rests = []
+  jsonHash = JSON.parse(access_token.get(path).body)
+  businessArray=jsonHash['businesses']
+  return businessArray
 end
 
-path = "/v2/search?term=restaurants&ll=37.786704,-122.401209&radius_filter=500&sort=0&limit=#{numRests}"
 
-toprated_rests = []
-
-jsonHash = JSON.parse(access_token.get(path).body)
-businessArray=jsonHash['businesses']
-businessArray.each do |x|
-  toprated_rests += [x['name']]
+#returns similar array, now sorted by top rating
+def topRests(numRests, dist, access_token)
+  path = "/v2/search?term=restaurants&ll=37.786704,-122.401209&radius_filter=#{dist}&sort=0&limit=#{numRests}"
+  toprated_rests = []
+  jsonHash = JSON.parse(access_token.get(path).body)
+  businessArray=jsonHash['businesses']
+  return businessArray
 end
 
-puts "The #{numRests} nearest restaurants to LiveRamp are:\n"
-closest_rests.each do |x|
-  puts "- #{x}"
+
+def putsArrayNames(array)
+  array.each do |x|
+    puts "#{x['name']}"
+  end
 end
 
-puts "\n\nand the #{numRests} highest rated restaurants near LiveRamp are:\n"
-toprated_rests.each do |x|
-  puts "- #{x}"
-end 
+def printArrayNames(array)
+  print "#{array[0]['name']}"
+  array[1..array.size].each do |x|
+    print ", #{x['name']}"
+  end
+end
+
+
+puts "The 10 nearest restaurants to LiveRamp are:\n"
+putsArrayNames(closestRests(10, 500, access_token))
+
+puts "\n\nand the 10 highest rated restaurants near LiveRamp are:\n"
+printArrayNames(topRests(10, 500, access_token))
