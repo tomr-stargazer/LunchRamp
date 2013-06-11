@@ -2,6 +2,7 @@ require 'rubygems'
 require 'oauth'
 require 'json'
 
+
 consumer_key = 'YiR3GbfH02O15qSJDwbOGw'
 consumer_secret = 'uonkCO1e8gg9ZNKmTs2RY7xTQ_A'
 token = '2fDh6TTELI8ZQ4N2QCcL4y899EIk2RUw'
@@ -45,9 +46,20 @@ def printArrayNames(array)
   end
 end
 
+def tellXRests(x, access_token)
+  puts "The #{x} nearest restaurants to LiveRamp are:\n"
+  putsArrayNames(closestRests(x, 500, access_token))
 
-puts "The 10 nearest restaurants to LiveRamp are:\n"
-putsArrayNames(closestRests(10, 500, access_token))
+  puts "\n\nand the #{x} highest rated restaurants near LiveRamp are:\n"
+  printArrayNames(topRests(x, 500, access_token))
+end
 
-puts "\n\nand the 10 highest rated restaurants near LiveRamp are:\n"
-printArrayNames(topRests(10, 500, access_token))
+
+def getRandRestClosest(x, access_token)
+  return closestRests(x, 500, access_token)[rand(x)]['name']
+end
+
+10.times do
+  puts "Your random restaurant is #{getRandRestClosest(10, access_token)}"
+end
+
